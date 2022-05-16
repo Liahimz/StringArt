@@ -8,7 +8,8 @@ from scipy.fft import fft, ifft
 from skimage import exposure
 import random
 import re
-# import os
+from os import listdir
+from os.path import isfile, join
 import sys
 
 """### Cчитывание картинки """
@@ -216,8 +217,25 @@ def main():
             return 0
 
     filename = "testdata/GirlwithPearl.png"
-    theta = theta = [0., 180.]
-    n = 45
+    theta = [0., 180.]
+    n = 70
+    if (len(sys.argv) == 1):
+        onlyfiles = [f for f in listdir("testdata") if isfile(join("testdata", f))]
+        print(onlyfiles)
+        for file in onlyfiles:
+            filename = "testdata/" + file
+            result = re.search(r'/\w+.\w+', filename)
+            # print(result[0] if result else 'Not found')
+            name = result[0][1:len(result[0]) - 4]
+            print(name)
+
+            art = get_stringart(filename, n_strings=n, theta=theta, name=name)
+            f = plt.figure(figsize=(10, 10))
+            plt.axis('off')
+            plt.imshow(art, cmap=plt.cm.Greys_r)
+            plt.savefig("results/" + name + "_result.png")
+            plt.show(block=True)
+        return 0
 
     if (len(sys.argv) == 2):
         filename = sys.argv[1]
@@ -239,8 +257,10 @@ def main():
     art = get_stringart(filename, n_strings=n, theta=theta, name=name)
     f = plt.figure(figsize=(10, 10))
     plt.axis('off')
-    plt.imshow(exposure.adjust_gamma(art, gamma=0.75, gain=1), cmap=plt.cm.Greys_r)
+    plt.imshow(art, cmap=plt.cm.Greys_r)
     plt.savefig("results/" + name + "_result.png")
+
+    return 0
   
 if __name__== "__main__":
   main()
