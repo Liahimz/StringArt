@@ -1,8 +1,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage.transform import radon, rescale
-from skimage.io import imread, imsave
+from skimage.transform import rescale, rotate
+from skimage.io import imread
 from functools import partial
 from scipy.fft import fft, ifft
 from skimage import exposure
@@ -53,9 +53,17 @@ def procces_to_circle(image):
     return rounded
 
 """### Получение синограмы с помощью прямого преоброзования радона пунтк 1 алгоритма из задания """
+def radon_transform(image, steps):
+    print(image.dtype)
+    radon = np.zeros((steps, len(image)), dtype='float64')
+    for s in range(steps):
+        rotation = rotate(image, -s*180/steps).astype('float64')
+        radon[:,s] = sum(rotation)
+    return radon
+
 def get_sinogram(rounded, theta):
     theta_x = np.linspace(theta[0], theta[1], max(rounded.shape), endpoint=False)
-    sinogram = radon(rounded, theta=theta_x, circle=True)
+    sinogram = radon_transform(rounded, rounded.shape[0])
     # plt.imshow(sinogram, cmap=plt.cm.Greys_r)
     return sinogram, theta_x
 
@@ -170,7 +178,7 @@ def back_projection(binary_img, theta):
 
     return reconstructed
 
-def get_stringart(src_file, n_strings = 45, theta = [0, 180], draw_add_info = True, name = "_"):
+def get_stringart(src_file, n_strings = 75, theta = [0, 180], draw_add_info = True, name = "_"):
     image = read_img(src_file)
     rounded = procces_to_circle(image)
     sinogram, theta_x = get_sinogram(rounded, theta)
